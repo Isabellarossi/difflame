@@ -593,28 +593,49 @@ def process_deleted_line(treeish1, treeish2, original_filename, final_filename, 
             Otherwise, will return the blamed revision
     """
     # let's find all revisions that are connected to this revisions starting from top_revision
+    sys.stderr.write("\tRange of revisions: " + treeish1 + ".." + treeish2 + "\n")
+    sys.stderr.write("\t\tTreeish1 " + treeish1 + ": " + git_revision_hint(treeish1) + "\n")
+    sys.stderr.write("\t\tTreeish2 " + treeish2 + ": " + git_revision_hint(treeish2) + "\n")
+    sys.stderr.write("\tBlamed Revision " + blamed_revision + ": " + git_revision_hint(blamed_revision) + "\n")
+    sys.stderr.write("\tOriginal Filename " + original_filename + " Deleted Line " + str(deleted_line_number) + "\n")
     children=revisions_pointing_to(treeish1, treeish2, blamed_revision)
+    sys.stderr.write("\tChildren revisions:\n")
+    for child in children:
+        sys.stderr.write("\t\t" + child + ": " + git_revision_hint(child) + "\n")
+    sys.stderr.flush()
     if len(children) == 0:
+        sys.stderr.write("\tFound no children... will return the original blamed revision (" + blamed_revision + ") saying that the deleting revision could not be found\n")
         # let's return blamed revision
         return (False, blamed_revision)
     if len(children) == 1:
+        sys.stderr.write("\tThere's only one child revision.... on that revision the line we are tracking is gone\n")
         blamed_revision = children[0]
         parents = get_parent_revisions(blamed_revision)
+        sys.stderr.write("\tParents of this child revision:\n")
+        for parent in parents:
+            sys.stderr.write("\t\t" + parent + ": " + git_revision_hint(parent) + "\n")
+        sys.stderr.flush()
         if len(parents) == 1:
+            sys.stderr.write("Child revision has a single parent... child revision (" + blamed_revision + ") is where the line was deleted\n")
             # doesn't look like a merge, found the culprit
             return (True, blamed_revision)
         '''
         if the 'alleged' revision is a merge revision, the 'real' revision that removed that line
         might be on another parent branch of the parent revision
         '''
+        sys.stderr.write("\tFinding parent where the line has been deleted:\n")
         deleting_parent = find_deleting_parent_from_merge(treeish1, original_filename, deleted_line_number, blamed_revision, parents)
+        sys.stderr.write("\t\t" + str(deleting_parent))
+        if deleting_parent is not None:
+            sys.stderr.write(": " + git_revision_hint(deleting_parent))
+        sys.stderr.write("\n")
         if deleting_parent is None:
+            sys.stderr.write("\tCouldn't find a deleting parent... deleting revision is the merge revision itself (" + blamed_revision + ")\n")
             # the deletion of the line happened at the merge revision itself, not any of the parents
             return (True, blamed_revision)
         else:
             # let's make a recursive analysis of blame to see what is the "new" blamed revision if we start from here
             line = get_reverse_blamed_line(treeish1, deleting_parent, cleanup_filename(final_filename), deleted_line_number)
-            #line = run_git_blame(["--reverse", "-s", "-L" + str(deleted_line_number) + "," + str(deleted_line_number), treeish1 + ".." + deleting_parent, "--", ) # TODO have to use the name of the file on the deleting_parent
             new_blamed_revision = get_full_revision_id(line.split(" ")[0])
             '''
             need to process this result further
