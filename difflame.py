@@ -594,14 +594,14 @@ def process_deleted_line(treeish1, treeish2, original_filename, final_filename, 
     """
     # let's find all revisions that are connected to this revisions starting from top_revision
     sys.stderr.write("\tRange of revisions: " + treeish1 + ".." + treeish2 + "\n")
-    sys.stderr.write("\t\tTreeish1 " + treeish1 + ": " + git_revision_hint(treeish1) + "\n")
-    sys.stderr.write("\t\tTreeish2 " + treeish2 + ": " + git_revision_hint(treeish2) + "\n")
-    sys.stderr.write("\tBlamed Revision " + blamed_revision + ": " + git_revision_hint(blamed_revision) + "\n")
+    sys.stderr.write("\t\tTreeish1 " + git_revision_hint(treeish1) + "\n")
+    sys.stderr.write("\t\tTreeish2 " + git_revision_hint(treeish2) + "\n")
+    sys.stderr.write("\tBlamed Revision " + git_revision_hint(blamed_revision) + "\n")
     sys.stderr.write("\tOriginal Filename " + original_filename + " Deleted Line " + str(deleted_line_number) + "\n")
     children=revisions_pointing_to(treeish1, treeish2, blamed_revision)
     sys.stderr.write("\tChildren revisions:\n")
     for child in children:
-        sys.stderr.write("\t\t" + child + ": " + git_revision_hint(child) + "\n")
+        sys.stderr.write("\t\t" + git_revision_hint(child) + "\n")
     sys.stderr.flush()
     if len(children) == 0:
         sys.stderr.write("\tFound no children... will return the original blamed revision (" + blamed_revision + ") saying that the deleting revision could not be found\n")
@@ -613,7 +613,7 @@ def process_deleted_line(treeish1, treeish2, original_filename, final_filename, 
         parents = get_parent_revisions(blamed_revision)
         sys.stderr.write("\tParents of this child revision:\n")
         for parent in parents:
-            sys.stderr.write("\t\t" + parent + ": " + git_revision_hint(parent) + "\n")
+            sys.stderr.write("\t\t" + git_revision_hint(parent) + "\n")
         sys.stderr.flush()
         if len(parents) == 1:
             sys.stderr.write("Child revision has a single parent... child revision (" + blamed_revision + ") is where the line was deleted\n")
