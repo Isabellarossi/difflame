@@ -600,10 +600,14 @@ def process_deleted_by_step(treeish1, treeish2, original_filename, deleted_line_
     sys.stderr.write("\tTreeish2: " + git_revision_hint(treeish2) + "\n")
     if get_line_in_revision(treeish1, treeish2, original_filename, deleted_line_number) is not None:
         raise Exception("This is a Bug: Line is _not_ deleted on treeish2")
-    revisions_treeish2=run_git_command(["log", "--pretty=%H", treeish1 + ".." + treeish2]).split("\n")
-    sys.stderr.write("\tRevisions that are part of treeish2 and are not part of the history of treeish1: " + str(len(revisions_treeish2)) + "\n")
+    revisions_treeish2=filter(None, run_git_command(["log", "--pretty=%H", treeish1 + ".." + treeish2]).split("\n"))
+    sys.stderr.write("\tRevisions that are part of treeish2 and are not part of the history of treeish1:\n")
+    for revision in revisions_treeish2:
+        sys.stderr.write("\t\t" + git_revision_hint(revision) + "\n")
     # TODO find the name of the file on treeish2
-    revisions_for_file=run_git_command(["log", "--pretty=%H", treeish1 + ".." + treeish2, "--", original_filename]).split("\n")
+    revisions_for_file=filter(None, run_git_command(["log", "--pretty=%H", treeish1 + ".." + treeish2, "--", original_filename]).split("\n"))
+    for revision in revisions_for_file:
+        sys.stderr.write("\t\t" + git_revision_hint(revision) + "\n")
     sys.stderr.write("\tRevisions that make up the history of the file: " + str(len(revisions_for_file)) + "\n")
     while True:
         revision=revisions_for_file[0]
