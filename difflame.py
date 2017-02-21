@@ -535,7 +535,7 @@ def process_deleted_line(treeish1, treeish2, original_filename, deleted_line_num
     sys.stderr.write("\tRevisions for treeish2: " + str(len(revisions_treeish2)) + "\n")
     # TODO find the name of the file on treeish2
     revisions_for_file=get_revisions(treeish1, treeish2, original_filename)
-    sys.stderr.write("\tRevisions for file: " + str(len(revisions_treeish2)) + "\n")
+    sys.stderr.write("\tRevisions for file: " + str(len(revisions_for_file)) + "\n")
     if len(revisions_for_file) == 0:
         sys.stderr.write("\tNo revisions for file.... returning None\n")
         return None
